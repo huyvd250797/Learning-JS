@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn JavaScript - Build Player Music</title>
+    <link rel="stylesheet" href="./assets/css/css.css">
+    <link rel="stylesheet" href="./assets/fonts/fontawesome-free-6.4.0-web/css/all.min.css">
+</head>
+<body>
+    
+  <div class="player">
+    <!-- Dashboard -->
+    <div class="dashboard">
+      <!-- Header -->
+      <header>
+        <h4>Now playing:</h4>
+        <h2>Ngày mai người ta lấy chồng</h2>
+      </header>
+  
+      <!-- CD -->
+      <div class="cd">
+        <div class="cd-thumb" style="background-image: url('./assets/img/ngay-mai-ngta-lay-chong.jpg');">
+
+        </div>
+      </div>
+  
+      <!-- Control -->
+      <div class="control">
+        <div class="btn btn-repeat">
+          <i class="fas fa-redo"></i>
+        </div>
+        <div class="btn btn-prev">
+          <i class="fas fa-step-backward"></i>
+        </div>
+        <div class="btn btn-toggle-play">
+          <i class="fas fa-pause icon-pause"></i>
+          <i class="fas fa-play icon-play"></i>
+        </div>
+        <div class="btn btn-next">
+          <i class="fas fa-step-forward"></i>
+        </div>
+        <div class="btn btn-random">
+          <i class="fas fa-random"></i>
+        </div>
+      </div>
+  
+      <input id="progress" class="progress" type="range" value="0" step="1" min="0" max="100">
+  
+      <audio id="audio" src=""></audio>
+    </div>
+  
+    <!-- Playlist -->
+    <div class="playlist">
+    </div>
+  </div>
+  
+  
+  
+
+    <script>
+      const $ = document.querySelector.bind(document)
+      const $$ = document.querySelectorAll.bind(document)
+
+      const player = $('.player')
+      const cd = $('.cd');
+      const heading = $('header h2')
+      const cdThumb = $('.cd-thumb')
+      const audio = $('#audio')
+      const playBtn = $('.btn-toggle-play')
+      const progress = $('#progress')
+
+      // Music lib
+      const app = {
+        currentIndex: 0,
+        isPlaying: false,
+        songs: [
+
+          {
+            name: 'Không phải gu',
+            singer: 'HIEUTHUHAI',
+            path: './assets/music/khong-phai-gu.mp3',
+            image: './assets/img/khong-phai-gu.jpg'
+          },
+          {
+            name: 'Ngày mai người ta lấy chồng',
+            singer: 'Thành Đạt',
+            path: './assets/music/ngay-mai-ngta-lay-chong.mp3',
+            image: './assets/img/ngay-mai-ngta-lay-chong.jpg'
+          },
+          ,
+          {
+            name: 'Không phải gu',
+            singer: 'HIEUTHUHAI',
+            path: './assets/music/khong-phai-gu.mp3',
+            image: './assets/img/khong-phai-gu.jpg'
+          },
+          {
+            name: 'Không phải gu',
+            singer: 'HIEUTHUHAI',
+            path: './assets/music/khong-phai-gu.mp3',
+            image: './assets/img/khong-phai-gu.jpg'
+          },
+          {
+            name: 'Không phải gu',
+            singer: 'HIEUTHUHAI',
+            path: './assets/music/khong-phai-gu.mp3',
+            image: './assets/img/khong-phai-gu.jpg'
+          },
+          {
+            name: 'Không phải gu',
+            singer: 'HIEUTHUHAI',
+            path: './assets/music/khong-phai-gu.mp3',
+            image: './assets/img/khong-phai-gu.jpg'
+          },
+          {
+            name: 'Không phải gu',
+            singer: 'HIEUTHUHAI',
+            path: './assets/music/khong-phai-gu.mp3',
+            image: './assets/img/khong-phai-gu.jpg'
+          },
+          {
+            name: 'Không phải gu',
+            singer: 'HIEUTHUHAI',
+            path: './assets/music/khong-phai-gu.mp3',
+            image: './assets/img/khong-phai-gu.jpg'
+          },
+          {
+            name: 'Không phải gu',
+            singer: 'HIEUTHUHAI',
+            path: './assets/music/khong-phai-gu.mp3',
+            image: './assets/img/khong-phai-gu.jpg'
+          },
+          {
+            name: 'Không phải gu',
+            singer: 'HIEUTHUHAI',
+            path: './assets/music/khong-phai-gu.mp3',
+            image: './assets/img/khong-phai-gu.jpg'
+          }
+        ],
+
+        // Render view music
+        render: function() {
+          const htmls = this.songs.map(song => {
+            return `
+            <div class="song">
+              <div class="thumb" style="background-image: url('${song.image}')">
+              </div>
+              <div class="body">
+                <h3 class="title">${song.name}</h3>
+                <p class="author">${song.singer}</p>
+              </div>
+              <div class="option">
+                <i class="fas fa-ellipsis-h"></i>
+              </div>
+            </div>
+            `
+          })
+          
+          $('.playlist').innerHTML = htmls.join('')
+        },
+
+        defineProperties: function() {
+          Object.defineProperty(this, 'currentSong', {
+            //  get bài hát đầu tiên
+            get: function() {
+              return this.songs[this.currentIndex]
+            }
+          })
+        },
+
+        handleEvents: function() {
+          //  _this = this handleEvent (app)
+          const _this = this
+          const cdWidth = cd.offsetWidth
+
+          //  xử lý phóng to / thu nhỏ 
+          document.onscroll = function() {
+            // gán scrollTop bằng 1 trong 2 loại scroll để phù hợp vs trình duyệt
+            const scrollTop = window.scrollY || document.documentElement.scrollTop
+
+            // cdWidth - scrollTop: scrollTop bao nhiêu thì cdWidth giảm đi bấy nhiêu
+            const newCDWidth = cdWidth - scrollTop
+
+            // gán width mới cho CD
+            // newCDWidth > 0 ? newCDWidth + 'px' : 0
+            // => If newCDWidth > 0 -> Lấy newCDWidth - else lấy 0
+            //  Scroll nhỏ dần và ẩn đi
+            cd.style.width = newCDWidth > 0 ? newCDWidth + 'px' : 0
+            //  Scroll mờ dần
+            cd.style.opacity = newCDWidth / cdWidth
+          }
+
+          //  Xử lý khi click play
+          playBtn.onclick = function() {
+            // code cũ
+            // if ( _this.isPlaying) {
+            //     //  this của playBtn - _this = this của handleEvent
+            //     _this.isPlaying = false
+            //     audio.pause()
+            //     player.classList.remove('playing')
+            //   //  Nếu đang playing thì hiển thị nút pause
+            // } else {
+            //     //  this của playBtn - _this = this của handleEvent
+            //     _this.isPlaying = true
+            //     audio.play()
+            //     player.classList.add('playing')
+            // }
+
+            if ( _this.isPlaying) {
+                audio.pause()
+            } else {
+                audio.play()
+            }
+
+          }
+
+          //  Khi song is played
+          audio.onplay = function() {
+            _this.isPlaying = true
+            player.classList.add('playing')
+          }
+
+          //  Khi song is paused
+          audio.onpause = function() {
+            _this.isPlaying = false
+            player.classList.remove('playing')
+          }
+
+          //  Khi processing song thay đổi
+          audio.ontimeupdate = function() {
+            if (audio.duration) {
+              //  progressPercent = thời gian hiện tại bài hát / tổng thời gian bài hát * 100 => %
+              const progressPercent = Math.floor(audio.currentTime / audio.duration * 100)
+              progress.value = progressPercent
+            }
+          }
+
+          //  Xử lý khi tua song
+          progress.onchange = function(e) {
+            const seekTime = audio.duration / 100 * e.target.value
+            audio.currentTime = seekTime
+          }
+
+
+        },
+
+        // Load bài hát hiện tại
+        loadCurrentSong: function() {
+
+
+          //  update header
+          heading.textContent = this.currentSong.name
+
+          //  update cd-thumb
+          cdThumb.style.backgroundImage = `url('${this.currentSong.image}')`
+
+          //  update audio src
+          audio.src = this.currentSong.path
+
+
+        },
+
+
+        // start functions
+        start: function() {
+          //  Định nghĩa các thuộc tính cho Object
+          this.defineProperties()
+
+          //  Lắng nghe / xử lý các sự kiện
+          this.handleEvents()
+
+
+          // Load thông tin bài hát đầu tiên vào UI
+          this.loadCurrentSong()
+
+          //  Render playlist
+          this.render()
+        }
+      }
+
+      app.start()
+       
+    </script>
+</body> 
+</html>

@@ -1,0 +1,40 @@
+{
+  "pokemons": [
+    {
+      "id": 1,
+      "name": "Pikachu",
+      "element": "Electric",
+      "image": ""
+    },
+    {
+      "id": 2,
+      "name": "Charmander",
+      "element": "Fire",
+      "image": ""
+    },
+    {
+      "id": 3,
+      "name": "Bulbasaur",
+      "element": "Grass_Poison",
+      "image": ""
+    },
+    {
+      "id": 4,
+      "name": "Squirtle",
+      "element": "Water",
+      "image": ""
+    },
+    {
+      "name": "Caterpie",
+      "element": "Bug",
+      "image": "",
+      "id": 5
+    },
+    {
+      "name": "Spearow",
+      "element": "Normal_Flying",
+      "image": "",
+      "id": 6
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn JavaScript - DOM CSS</title>
+
+    <style>
+        .redColor {
+            color: rgb(255, 19, 19);
+        }
+
+        .bgAqua {
+            background-color: rgb(143, 255, 255);
+        }
+
+        .bgPurple {
+            background-color: rgb(248, 255, 39);
+        }
+
+        .bgGreen {
+            background-color: rgb(141, 255, 141);
+        }
+
+        .whiteColor {
+            color: #FFF;
+        }
+
+        ul {
+            display: none;
+        }
+
+        .inputPreDef:focus ~ ul {
+            display: block;
+        }
+
+    </style>
+</head>
+
+<body>
+    <h1>JavaScript DOM CSS</h1>
+    <h1>JavaScript Class List</h1>
+    
+
+    <div class="box">
+        
+    </div>
+
+    <div class="box-1">
+        
+    </div>
+
+    <h1 style="color: blue">ClassList property</h1>
+
+    <div class="box-2 box-3">
+        
+    </div>
+
+    <h1>** classList</h1>
+    <div class="classList">
+        <h2>- Example ClassList Property</h2>
+    </div>
+
+
+    <h1>*** Bài tập: bạn hãy thêm class box vào các thẻ div. </h1>
+    <div>Box</div>
+    <div>Box</div>
+    <div>Box</div>
+    <div>Box</div>
+    <div>Box</div>
+    <div>Box</div>
+    <div>Box</div>
+    <div>Box</div>
+    <div>Box</div>
+    <div>Box</div>
+
+
+    <h1 style="color: blue;">DOM Events</h1>
+    <h2 style="color: red;">*** Attribute Events ***</h2>
+
+    <h2 onclick="console.log(this)">this</h2>
+
+    <h2 onclick="console.log(this)">
+        <span onclick="console.log(this)">this span</span>
+    </h2>
+
+
+    <button onclick="console.log('onClick: ',Math.random())">Click to occur the event</button>
+
+    <h2 onmouseover="console.log('onMouseOver: ',Math.random())">Hover me to occur the event</h2>
+
+
+    <h2 style="color: red;">*** Assign Event using the element node ***</h2>
+    <h2 style="color: green;">*** Gán event ***</h2>
+
+    <h1 class="exDOMEvent1">
+        <span>Example 1</span>
+    </h1>
+
+    <h1 class="exDOMEvent1">
+        <span>Example 2</span>
+    </h1>
+
+    <h1 class="exDOMEvent1">
+        <span>Example 3</span>
+    </h1>
+
+
+    <button class="btnChangeColor">Change Color</button>
+    <button class="toggleChangeColor">Change Color Toggle</button>
+
+    
+
+    <h1 style="color: blue;">More Example</h1>
+    
+    <input type="text">
+    <input type="checkbox">
+
+    <select>
+        <option value="value-1">1</option>
+        <option value="value-2">2</option>
+        <option value="value-3">3</option>
+    </select>
+
+    <h1 style="color: blue;">Example PreventDefault_1</h1>
+    <a href="https://www.google.com.vn/?hl=vi">Google</a>
+    <br>
+    <a href="https://www.youtube.com/">Youtube</a>
+
+    <h1 style="color: blue;">Example PreventDefault_2</h1>
+
+    <input class="inputPreDef" placeholder="Tìm kiếm">
+    <ul>
+        <li>Mango</li>
+        <li>Lemon</li>
+        <li>Apple</li>
+    </ul>
+
+
+    <h1 style="color: blue;">Example StopPropagation</h1>
+
+
+    <!-- Mặc định: Khi Click vào "DIV" => DIV -->
+    <!-- Mặc định: Khi Click vào "Click me!" => DIV & Click me! -->
+    <div class="exStopPropa"">
+        DIV
+
+        <button class="btnStopPropa">Click me!</button>
+    </div>
+
+
+    <h1 style="color: blue;">Example Event Listener</h1>
+
+    <button id="btnEL1">Click me 1 ! Please</button>
+    <br>
+    <br>
+    <button id="btnEL2">Click me 2 ! Please</button>
+
+    <script src="./main.js">
+
+    </script>
+</body>
+</html>
