@@ -99,6 +99,7 @@ header h2 {
 
 .btn-toggle-play:hover {
   cursor: pointer;
+  opacity: .8;
 }
 
 .control .btn-toggle-play {
@@ -133,6 +134,16 @@ header h2 {
   cursor: pointer;
 }
 
+.btn-next:hover,
+.btn-prev:hover {
+  cursor: pointer;
+  opacity: .7;
+}
+
+.btn-random:hover {
+  cursor: pointer;
+}
+
 /* PLAYLIST */
 .playlist {
   margin-top: 408px;
@@ -147,6 +158,10 @@ header h2 {
   padding: 8px 16px;
   border-radius: 5px;
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+}
+
+.song:hover {
+  cursor: pointer;
 }
 
 .song.active {

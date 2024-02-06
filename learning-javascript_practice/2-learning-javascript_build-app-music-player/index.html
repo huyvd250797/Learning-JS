@@ -63,6 +63,8 @@
       const $ = document.querySelector.bind(document)
       const $$ = document.querySelectorAll.bind(document)
 
+      const PLAYER_STORAGE_KEY = 'HV_PLAYER'
+
       const player = $('.player')
       const cd = $('.cd');
       const heading = $('header h2')
@@ -70,11 +72,19 @@
       const audio = $('#audio')
       const playBtn = $('.btn-toggle-play')
       const progress = $('#progress')
+      const nextBtn = $('.btn-next')
+      const prevBtn = $('.btn-prev')
+      const randomBtn = $('.btn-random')
+      const repeatBtn = $('.btn-repeat')
+      const playlist = $('.playlist')
 
       // Music lib
       const app = {
         currentIndex: 0,
         isPlaying: false,
+        isRandom: false,
+        isRepeat: false,
+        config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},
         songs: [
 
           {
@@ -89,62 +99,38 @@
             path: './assets/music/ngay-mai-ngta-lay-chong.mp3',
             image: './assets/img/ngay-mai-ngta-lay-chong.jpg'
           },
-          ,
           {
-            name: 'Không phải gu',
-            singer: 'HIEUTHUHAI',
-            path: './assets/music/khong-phai-gu.mp3',
-            image: './assets/img/khong-phai-gu.jpg'
+            name: 'Bạn đời',
+            singer: 'Karik ft GDUCKY',
+            path: './assets/music/ban-doi.mp3',
+            image: './assets/img/ban-doi.png'
           },
           {
-            name: 'Không phải gu',
+            name: 'Exit Sign',
             singer: 'HIEUTHUHAI',
-            path: './assets/music/khong-phai-gu.mp3',
-            image: './assets/img/khong-phai-gu.jpg'
+            path: './assets/music/exit-sign.mp3',
+            image: './assets/img/exit-sign.png'
           },
           {
-            name: 'Không phải gu',
-            singer: 'HIEUTHUHAI',
-            path: './assets/music/khong-phai-gu.mp3',
-            image: './assets/img/khong-phai-gu.jpg'
+            name: 'Don"t Côi',
+            singer: 'RPT Orijinn x Ronboogz',
+            path: './assets/music/dont-coi.mp3',
+            image: './assets/img/dont-coi.png'
           },
-          {
-            name: 'Không phải gu',
-            singer: 'HIEUTHUHAI',
-            path: './assets/music/khong-phai-gu.mp3',
-            image: './assets/img/khong-phai-gu.jpg'
-          },
-          {
-            name: 'Không phải gu',
-            singer: 'HIEUTHUHAI',
-            path: './assets/music/khong-phai-gu.mp3',
-            image: './assets/img/khong-phai-gu.jpg'
-          },
-          {
-            name: 'Không phải gu',
-            singer: 'HIEUTHUHAI',
-            path: './assets/music/khong-phai-gu.mp3',
-            image: './assets/img/khong-phai-gu.jpg'
-          },
-          {
-            name: 'Không phải gu',
-            singer: 'HIEUTHUHAI',
-            path: './assets/music/khong-phai-gu.mp3',
-            image: './assets/img/khong-phai-gu.jpg'
-          },
-          {
-            name: 'Không phải gu',
-            singer: 'HIEUTHUHAI',
-            path: './assets/music/khong-phai-gu.mp3',
-            image: './assets/img/khong-phai-gu.jpg'
-          }
         ],
 
+        // config function
+        setConfig: function(key, value) {
+          this.config[key] = value;
+          localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(this.config))
+        },
         // Render view music
         render: function() {
-          const htmls = this.songs.map(song => {
+          const htmls = this.songs.map((song, index) => {
+            // Nếu index = this.currentIndex => active, ngược lại => ''
+            // data-index= để lấy giá trị index hiện tại của bài hát
             return `
-            <div class="song">
+            <div class="song ${index === this.currentIndex ? 'active' : ''}" data-index="${index}">    
               <div class="thumb" style="background-image: url('${song.image}')">
               </div>
               <div class="body">
@@ -158,7 +144,7 @@
             `
           })
           
-          $('.playlist').innerHTML = htmls.join('')
+          playlist.innerHTML = htmls.join('')
         },
 
         defineProperties: function() {
@@ -174,6 +160,16 @@
           //  _this = this handleEvent (app)
           const _this = this
           const cdWidth = cd.offsetWidth
+
+          // Xử lý CD quay / dừng
+          const cdThumbAnimate = cdThumb.animate([
+            {transform: 'rotate(360deg)'}  // CD quay 360 deg
+          ], {
+            duration: 10000,            // CD quay trong 10 seconds
+            interations: Infinity       // Cd quay lặp lại vô hạn
+          })
+          // cdThumbAnimate có giá trị trên và pause ngay lúc đầu
+          cdThumbAnimate.pause()
 
           //  xử lý phóng to / thu nhỏ 
           document.onscroll = function() {
@@ -220,12 +216,16 @@
           audio.onplay = function() {
             _this.isPlaying = true
             player.classList.add('playing')
+            // Khi play thì CD quay
+            cdThumbAnimate.play()
           }
 
           //  Khi song is paused
           audio.onpause = function() {
             _this.isPlaying = false
             player.classList.remove('playing')
+            // Khi pause thì CD dừng quay
+            cdThumbAnimate.pause()
           }
 
           //  Khi processing song thay đổi
@@ -243,12 +243,102 @@
             audio.currentTime = seekTime
           }
 
+          // Xử lý khi click Next song
+          nextBtn.onclick = function () {
+            // Nếu isRandom = TRUE thì gọi hàm playRandom ngược lại thì gọi hàm Next
+            if (_this.isRandom) {
+              _this.playRandom()
+            } else {
+              _this.nextSong()
+              // Gọi hàm play để play bài hát được next
+            }
+            audio.play()
+            // render lại app
+            _this.render()
+          }
+
+          // XỬ lý khi click Prev song
+          prevBtn.onclick = function () {
+            // Nếu isRandom = TRUE thì gọi hàm playRandom ngược lại thì gọi hàm Prev
+            if (_this.isRandom) {
+              _this.playRandom()
+            } else {
+              _this.prevSong()
+              console.log(this.currentIndex)
+              // Gọi hàm play để play bài hát được prev
+            }
+            audio.play()
+            // render lại app
+            _this.render()
+          }
+
+          // Xử lý bật / tắt random song
+          randomBtn.onclick = function(e) {
+            // ban đầu = false => khi click vào random, sẽ thành true
+            _this.isRandom = !_this.isRandom
+            // sử dụng config để lưu vào storage
+            _this.setConfig('isRadom', _this.isRandom)
+            // toggle([class-name], [boolean value])
+            // boolean value = TRUE ==> add [class-name]
+            // boolean value = FALSE ==> remove [class-name]
+            randomBtn.classList.toggle('active', _this.isRandom)
+          }
+
+          // Xử lý bật / tắt repeat song
+          repeatBtn.onclick = function() {
+            _this.isRepeat = !_this.isRepeat
+            // sử dụng config để lưu vào storage
+            _this.setConfig('isRepeat', _this.isRepeat)
+            repeatBtn.classList.toggle('active', _this.isRepeat)
+          }
+
+          // Xử lý next song khi audio ended (tự động sang bài tiếp theo khi hết)
+          audio.onended = function () {
+            // Nếu Repeat is TRUE ==> phát lại bài hát
+            if (_this.isRepeat) {
+              audio.play()
+            } else {
+              nextBtn.click()
+            }
+          }
+
+          // Lắng nghe click vào playlist
+          playlist.onclick = function(e) {
+            const songNode = e.target.closest('.song:not(.active)')
+            const songOption = e.target.closest('.option')
+            // Kiểm tra xem khi click có phải click vào class .song không và không lấy những song có active
+            // Kiểm tra xem khi click có phải click vào class .option không
+            if (songNode || songOption) {
+              // Xử lý khi click vào song lấy được giá trị index
+              if (songNode) {
+                // console.log(songNode.getAttribute('data-index')) -- có thể dùng getAttribute('data-index')
+                // code gọn hơn dùng dataset
+                // console.log(songNode.dataset.index) 
+
+                // get index của song
+                // dữ liệu khi get từ element sẽ bị đổi thành STRING nên convert sang Number
+                _this.currentIndex = Number(songNode.dataset.index)
+                // load song vừa get
+                _this.loadCurrentSong()
+                _this.render()
+                // play song
+                audio.play()
+              }
+            }
+              // Xử lý khi click vào option
+              if (songOption) {
+              }
+          }
+          
+
+          
+          
+
 
         },
 
         // Load bài hát hiện tại
         loadCurrentSong: function() {
-
 
           //  update header
           heading.textContent = this.currentSong.name
@@ -258,13 +348,58 @@
 
           //  update audio src
           audio.src = this.currentSong.path
+        },
 
+        // Load config
+        loadConfig: function() {
+          this.isRandom = this.config.isRandom
+          this.isRepeat = this.config.isRepeat
+        },
+
+        // Next Song function
+        nextSong: function() {
+          this.currentIndex++
+          // Nếu bài hát khi next >= bài cuối cùng thì trả bài hát về 0 (bài đầu tiên)
+          if (this.currentIndex >= this.songs.length) {
+            // Trả về bài đầu tiên
+            this.currentIndex = 0
+          }
+          // Sau đó gọi hàm loadCurrentSong để load bài hát lên
+          this.loadCurrentSong()
+        },
+
+        // Prev Song function
+        prevSong: function() {
+          this.currentIndex--
+          if (this.currentIndex < 0) {
+            // Nếu bài hát nhỏ hơn vị trí 0, thì bài hát hiện tại = bài hát cuối cùng
+            this.currentIndex = this.songs.length
+          }
+          this.loadCurrentSong()
+        },
+
+
+        // Play radom Song
+        playRandom: function() {
+          // Khai báo bài hát mới
+          let newIndex
+          do {
+            // Thực hiện vòng lặp lấy ngẫu nhiên trong danh sách songs
+            newIndex = Math.floor(Math.random() * this.songs.length)
+            // Khi bài hát mới được next = cái cũ thì tiếp tục random bài khác
+          } while (newIndex === this.currentIndex)
+          this.currentIndex = newIndex
+          this.loadCurrentSong()
 
         },
 
 
+
         // start functions
         start: function() {
+          // Gán cấu hình từ config vào object app
+          this.loadConfig()
+
           //  Định nghĩa các thuộc tính cho Object
           this.defineProperties()
 
@@ -277,6 +412,10 @@
 
           //  Render playlist
           this.render()
+
+          // Hiển thị trạng thái ban đầu của btn repeat & random
+          randomBtn.classList.toggle('active', this.isRandom)
+          repeatBtn.classList.toggle('active', this.isRepeat)
         }
       }
 
